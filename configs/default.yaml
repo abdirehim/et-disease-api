@@ -15,15 +15,15 @@ batch_size: 32
 epochs: 20
 lr: 1.0e-3
 weight_decay: 1.0e-4
-precision: 32  # Use 32-bit precision for reliable CPU/GPU compatibility
-accelerator: "auto"
-devices: "auto"
+precision: "16-mixed"  # Use mixed precision for faster training
+accelerator: "gpu"
+devices: 1
 early_stopping_patience: 5
 
 # Paths
 log_dir: "logs"
 checkpoint_dir: "weights"
-best_checkpoint_path: "weights/best.ckpt"
+best_checkpoint_path: "weights/best-v1.ckpt"
 
 # Augmentation
 augment: true

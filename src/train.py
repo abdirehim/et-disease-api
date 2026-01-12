@@ -20,6 +20,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.lightning_module import DiseaseModule
 
+torch.set_float32_matmul_precision('medium')
+
 class DiseaseDataset(Dataset):
     def __init__(self, root_dir, split, transform=None):
         self.root_dir = Path(root_dir) / split
