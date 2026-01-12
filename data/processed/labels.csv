@@ -1,0 +1,26 @@
+class_name,label_idx
+Bell pepper_healthy,0
+Bell_pepper_Bacterial_spot,1
+Corn_Blight,2
+Corn_Common_Rust,3
+Corn_Healthy,4
+Grape_Leaf_blight_(Isariopsis_Leaf_Spot),5
+Grape___Esca_(Black_Measles),6
+Grape_healthy,7
+Olive_aculus_olearius,8
+Olive_healthy,9
+Olive_peacock_spot,10
+Potato_Early Blight,11
+Potato_Late Blight,12
+Potato_healthy,13
+Strawberry_Leaf Scorch,14
+Strawberry_heathy,15
+Tomato_Bacterial Spots,16
+Tomato_Early Blight,17
+Tomato_Late Blight,18
+Tomato_Leaf Mold,19
+Tomato_Mosaic_Virus,20
+Tomato_Septoria Leaf Spot,21
+Tomato_Target Spot,22
+Tomato_Yellow Leaf Curl Virus,23
+Tomato_healthy,24

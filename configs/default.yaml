@@ -1,0 +1,32 @@
+# Data Configuration
+data_path: "data/processed"
+raw_data_path: "data/raw"
+img_size: 512
+num_workers: 4
+num_classes: 25
+
+# Model Configuration
+model_name: "efficientnet-b0"
+pretrained: true
+dropout: 0.2
+
+# Training Configuration
+batch_size: 32
+epochs: 20
+lr: 1.0e-3
+weight_decay: 1.0e-4
+precision: 32  # Use 32-bit precision for reliable CPU/GPU compatibility
+accelerator: "auto"
+devices: "auto"
+early_stopping_patience: 5
+
+# Paths
+log_dir: "logs"
+checkpoint_dir: "weights"
+best_checkpoint_path: "weights/best.ckpt"
+
+# Augmentation
+augment: true
+horizontal_flip_prob: 0.5
+vertical_flip_prob: 0.5
+rotate_limit: 30
