@@ -8,9 +8,10 @@ import numpy as np
 import pandas as pd
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from contextlib import asynccontextmanager
 from PIL import Image
+from fastapi.middleware.cors import CORSMiddleware
 
 # Add project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -81,6 +82,21 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Ethiopia Plant Disease API", lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"DEBUG: {request.method} {request.url}")
+    response = await call_next(request)
+    print(f"DEBUG: Status {response.status_code}")
+    return response
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Ethiopia Plant Disease Classification API"}
@@ -99,31 +115,41 @@ def get_classes():
 
 @app.post("/predict")
 async def predict_disease(file: UploadFile = File(...)):
+    print(f"Received prediction request: {file.filename}")
     if model is None:
+        print("Error: Model is not loaded!")
         raise HTTPException(status_code=503, detail="Model not loaded")
         
-    contents = await file.read()
-    input_tensor = preprocess_image(contents, config['img_size'])
-    input_tensor = input_tensor.to(device)
-    
-    with torch.no_grad():
-        logits = model(input_tensor)
-        probabilities = torch.nn.functional.softmax(logits, dim=1)
+    try:
+        contents = await file.read()
+        print(f"File size: {len(contents)} bytes")
         
-    confidence, predicted_idx = torch.max(probabilities, 1)
-    idx = predicted_idx.item()
-    conf = confidence.item()
-    
-    label_name = label_map[idx] if label_map else str(idx)
-    
-    # Get all probabilities
-    probs_dict = {}
-    if label_map:
-        for i, prob in enumerate(probabilities[0]):
-            probs_dict[label_map[i]] = float(prob)
+        input_tensor = preprocess_image(contents, config['img_size'])
+        input_tensor = input_tensor.to(device)
+        print("Image preprocessed successfully.")
+        
+        with torch.no_grad():
+            logits = model(input_tensor)
+            probabilities = torch.nn.functional.softmax(logits, dim=1)
             
-    return {
-        "disease": label_name,
-        "confidence": float(conf),
-        "probabilities": probs_dict
-    }
+        confidence, predicted_idx = torch.max(probabilities, 1)
+        idx = predicted_idx.item()
+        conf = confidence.item()
+        
+        label_name = label_map[idx] if label_map else str(idx)
+        print(f"Prediction: {label_name} ({conf:.2f})")
+        
+        # Get all probabilities
+        probs_dict = {}
+        if label_map:
+            for i, prob in enumerate(probabilities[0]):
+                probs_dict[label_map[i]] = float(prob)
+                
+        return {
+            "disease": label_name,
+            "confidence": float(conf),
+            "probabilities": probs_dict
+        }
+    except Exception as e:
+        print(f"CRITICAL ERROR during prediction: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
